@@ -1,12 +1,12 @@
 // lib/ui/screens/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/folder.dart';
-import '../providers/auth_provider.dart';
-import '../providers/bookmark_provider.dart';
-import '../screens/folder_page.dart';
-import '../screens/search_page.dart';
-import '../screens/create_folder_page.dart';
+import '../../models/folder.dart'; // Corrected path
+import '../../providers/auth_provider.dart'; // Corrected path
+import '../../providers/bookmark_provider.dart'; // Corrected path
+import 'folder_page.dart'; // Corrected path
+import 'search_page.dart'; // Corrected path
+import 'create_folder_page.dart'; // Corrected path
 
 class HomePage extends StatefulWidget {
   @override
@@ -137,13 +137,16 @@ class BookmarkListPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: ListTile(
-                leading: folder.logoUrl != null
+                leading: folder.logoUrl != null && folder.logoUrl!.isNotEmpty
                     ? CircleAvatar(
                         backgroundImage: NetworkImage(folder.logoUrl!),
                         radius: 30.0,
                       )
                     : CircleAvatar(
-                        child: Text(folder.name[0],
+                        child: Text(
+                            folder.name.isNotEmpty
+                                ? folder.name[0]
+                                : 'F', // Handle empty name
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         radius: 30.0,
                       ),

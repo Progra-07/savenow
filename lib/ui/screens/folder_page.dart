@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
-import '../models/folder.dart';
-import '../models/bookmark.dart';
-import '../providers/bookmark_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Added for Supabase.instance.client
+import '../../models/folder.dart'; // Corrected path
+import '../../models/bookmark.dart'; // Corrected path
+import '../../providers/bookmark_provider.dart'; // Corrected path
 
 class FolderPage extends StatefulWidget {
   final Folder folder;
@@ -120,28 +121,41 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   Future<File?> _pickFile() async {
-    final pickedFile = await FilePicker.platform.pickFiles();
-    return pickedFile != null ? File(pickedFile.files.single.path!) : null;
+    final result = await FilePicker.platform.pickFiles(); // result can be null
+    if (result != null && result.files.single.path != null) {
+      return File(result.files.single.path!);
+    }
+    return null;
   }
 
   Future<String> _uploadFile(File file) async {
     try {
-      final path =
-          'bookmarks/${widget.folder.id}/${DateTime.now().millisecondsSinceEpoch}';
-      final res = await Supabase.instance.client.storage
+      final fileExtension = file.path.split('.').last;
+      final filePath =
+          'bookmarks/${widget.folder.id}/${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
+
+      await Supabase.instance.client.storage
           .from(
               'bookmark_images') // Ensure this matches your Supabase bucket name
-          .upload(file: file.path, path: path);
-      final urlResponse = await Supabase.instance.client.storage
+          .upload(filePath, file); // Corrected: Positional arguments
+
+      final publicUrl = Supabase.instance.client.storage
           .from('bookmark_images')
-          .getPublicUrl(path: res.path);
-      return urlResponse.url;
+          .getPublicUrl(filePath); // Corrected: Positional argument
+      return publicUrl;
     } catch (e) {
+      print('File upload error: $e'); // It's good to log the specific error
       throw Exception('File upload failed: $e');
     }
   }
 
   void _createBookmark(String url) {
+    if (_titleController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a title for the bookmark.')),
+      );
+      return;
+    }
     Provider.of<BookmarkProvider>(context, listen: false)
         .createBookmark(widget.folder.id, _titleController.text, url);
   }
@@ -155,6 +169,8 @@ class _FolderPageState extends State<FolderPage> {
   }
 
   void _showUrlDialog(BuildContext context) {
+    // Ensure _urlController is cleared before showing dialog if it's reused
+    _urlController.clear();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -164,6 +180,7 @@ class _FolderPageState extends State<FolderPage> {
           decoration: InputDecoration(
             hintText: 'Enter URL',
           ),
+          autofocus: true,
         ),
         actions: [
           TextButton(
@@ -173,9 +190,14 @@ class _FolderPageState extends State<FolderPage> {
           TextButton(
             child: Text('Add'),
             onPressed: () {
-              Navigator.of(context).pop();
-              _createBookmark(_urlController.text);
-              _clearFields();
+              if (_urlController.text.isNotEmpty) {
+                Navigator.of(context)
+                    .pop(); // Pop before calling createBookmark
+                _createBookmark(_urlController.text);
+                _clearFields(); // Clear fields after successful submission
+              } else {
+                // Optionally, show a small validation message within the dialog
+              }
             },
           ),
         ],

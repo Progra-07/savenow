@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
-import '../providers/bookmark_provider.dart';
+import '../../providers/bookmark_provider.dart'; // Corrected path
 
 class CreateFolderPage extends StatefulWidget {
   @override
@@ -17,13 +17,15 @@ class _CreateFolderPageState extends State<CreateFolderPage> {
   File? _folderLogo;
 
   Future<void> _pickImage() async {
-    final pickedFile = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
+      // Renamed for clarity
       type: FileType.image,
       allowMultiple: false,
     );
-    if (pickedFile != null) {
+    if (result != null && result.files.single.path != null) {
+      // Check if path is not null
       setState(() {
-        _folderLogo = File(pickedFile.files.single.path!);
+        _folderLogo = File(result.files.single.path!);
       });
     }
   }
@@ -42,11 +44,14 @@ class _CreateFolderPageState extends State<CreateFolderPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Make the page scrollable to avoid overflow when keyboard appears
     return Scaffold(
       appBar: AppBar(
         title: Text('Create New Folder'),
+        backgroundColor: Colors.orange, // Consistent AppBar color
       ),
-      body: Padding(
+      body: SingleChildScrollView(
+        // Added SingleChildScrollView
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
@@ -55,30 +60,54 @@ class _CreateFolderPageState extends State<CreateFolderPage> {
               GestureDetector(
                 onTap: _pickImage,
                 child: CircleAvatar(
-                  radius: 40,
+                  radius: 50, // Increased radius
+                  backgroundColor:
+                      Colors.grey[200], // Background color for avatar
                   backgroundImage:
                       _folderLogo != null ? FileImage(_folderLogo!) : null,
                   child: _folderLogo == null
-                      ? Icon(Icons.add_a_photo, size: 35)
+                      ? Icon(Icons.add_a_photo,
+                          size: 40, color: Colors.grey[800]) // Icon color
                       : null,
                 ),
               ),
               SizedBox(height: 20),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Folder Name'),
+                decoration: InputDecoration(
+                  labelText: 'Folder Name',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter a folder name' : null,
                 onSaved: (value) => _folderName = value!,
               ),
               SizedBox(height: 20),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Folder Details'),
-                onSaved: (value) => _folderDetails = value!,
+                decoration: InputDecoration(
+                  labelText: 'Folder Details (Optional)',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onSaved: (value) =>
+                    _folderDetails = value ?? '', // Handle null value
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 30), // Increased spacing
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // Consistent button color
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: TextStyle(fontSize: 18),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0)),
+                ),
                 onPressed: () => _createFolder(context),
-                child: Text('Create Folder'),
+                child: Text('Create Folder',
+                    style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

@@ -1,7 +1,7 @@
 // lib/ui/screens/register_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import '../../providers/auth_provider.dart'; // Corrected path
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -88,7 +88,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   child: Text(
                     'Register',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                        fontSize: 18, color: Colors.white), // Added text color
                   ),
                   onPressed: () async {
                     try {
@@ -97,12 +98,17 @@ class _RegisterPageState extends State<RegisterPage> {
                         passwordController.text,
                         usernameController.text,
                       );
-                      Navigator.pop(
-                          context); // Return to previous screen (e.g., LoginPage)
+                      if (mounted) {
+                        // Check if the widget is still in the tree
+                        Navigator.pop(context); // Return to previous screen
+                      }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Registration failed: $e')),
-                      );
+                      if (mounted) {
+                        // Check if the widget is still in the tree
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Registration failed: $e')),
+                        );
+                      }
                     }
                   },
                 ),

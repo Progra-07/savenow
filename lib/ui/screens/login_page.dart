@@ -1,8 +1,8 @@
 // lib/ui/screens/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
-import '../screens/register_page.dart';
+import '../../providers/auth_provider.dart'; // Corrected path
+import 'register_page.dart'; // Corrected path
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
@@ -70,7 +70,10 @@ class LoginPage extends StatelessWidget {
                   ),
                   child: Text(
                     'Login',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors
+                            .white), // Added text color for better contrast
                   ),
                   onPressed: () async {
                     try {
@@ -78,6 +81,8 @@ class LoginPage extends StatelessWidget {
                         emailController.text,
                         passwordController.text,
                       );
+                      // On successful login, AuthWrapper will rebuild and navigate.
+                      // No explicit navigation needed here if AuthWrapper handles it.
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Login failed: $e')),

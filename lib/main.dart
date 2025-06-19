@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
+import 'core/error_handler.dart'; // Added import
 import 'ui/screens/auth_wrapper.dart';
 import 'providers/auth_provider.dart';
 import 'providers/bookmark_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  ErrorHandler.initialize(); // Initialize the error handler
 
   // Initialize Supabase with your project's URL and ANON KEY
   await Supabase.initialize(
